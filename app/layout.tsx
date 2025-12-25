@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-// Fix: Replaced Plus_Jakarta_Sans with Inter to resolve module export error
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-// Fix: Initializing Inter font as a robust alternative
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",

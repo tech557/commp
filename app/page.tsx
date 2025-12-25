@@ -15,8 +15,8 @@ import {
   Settings as SettingsIcon, 
   LogOut,
   Menu,
-  X,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck
 } from 'lucide-react';
 
 type Module = 'dashboard' | 'crm' | 'cms' | 'settings' | 'cms-editor';
@@ -29,11 +29,19 @@ export default function AppRoot() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+    // Initial session check
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+      } catch (e) {
+        console.error("Session check failed", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -55,11 +63,14 @@ export default function AppRoot() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="space-y-4 text-center">
-          <div className="w-12 h-1 border-t-2 border-[#75E2FF] animate-pulse mx-auto" />
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50">Initializing Core OS</p>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+        <div className="w-16 h-16 relative">
+          <div className="absolute inset-0 border-2 border-[#75E2FF]/20 rounded-full" />
+          <div className="absolute inset-0 border-2 border-t-[#75E2FF] rounded-full animate-spin" />
         </div>
+        <p className="mt-8 text-[10px] font-black uppercase tracking-[0.5em] text-[#75E2FF] animate-pulse">
+          Initializing OS
+        </p>
       </div>
     );
   }
@@ -69,21 +80,25 @@ export default function AppRoot() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] dark:bg-black flex font-sans overflow-hidden">
+    <div className="min-h-screen bg-black flex font-sans overflow-hidden selection:bg-[#75E2FF] selection:text-black">
       {/* Sidebar Navigation */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-black border-r border-zinc-800 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-black border-r border-zinc-900 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="h-full flex flex-col p-8">
-          {/* Logo */}
-          <div className="mb-16">
-            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">DOTMENT</h2>
-            <div className="h-0.5 w-8 bg-[#75E2FF] mt-2" />
+          <div className="mb-16 flex items-center gap-3">
+            <div className="w-8 h-8 bg-[#75E2FF] flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5 text-black" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-none">DOTMENT</h2>
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Enterprise OS</span>
+            </div>
           </div>
 
-          <nav className="flex-1 space-y-2">
+          <nav className="flex-1 space-y-1">
             <NavItem 
               icon={LayoutDashboard} 
               label="Dashboard" 
@@ -102,8 +117,8 @@ export default function AppRoot() {
               active={activeModule === 'cms' || activeModule === 'cms-editor'} 
               onClick={() => navigate('cms')} 
             />
-            <div className="pt-8 pb-4">
-              <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-4">Preference</span>
+            <div className="pt-10 pb-4">
+              <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest px-4 block">Configurations</span>
             </div>
             <NavItem 
               icon={SettingsIcon} 
@@ -116,50 +131,54 @@ export default function AppRoot() {
           <div className="mt-auto pt-8 border-t border-zinc-900">
             <button 
               onClick={() => supabase.auth.signOut()}
-              className="w-full flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-white transition-colors group"
+              className="w-full flex items-center gap-3 px-4 py-3 text-zinc-500 hover:text-white transition-all group"
             >
-              <LogOut className="w-4 h-4 group-hover:text-red-500" />
-              <span className="text-xs font-black uppercase tracking-widest">Sign Out</span>
+              <LogOut className="w-4 h-4 group-hover:text-red-500 transition-colors" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Terminate Session</span>
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main Viewport */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-zinc-50 dark:bg-black">
-        {/* Top Header */}
-        <header className="h-20 bg-white dark:bg-black border-b border-black dark:border-zinc-800 flex items-center justify-between px-8 sticky top-0 z-40">
+      {/* Main Content Viewport */}
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-black relative">
+        {/* Subtle grid background */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03]" 
+             style={{ backgroundImage: 'radial-gradient(#75E2FF 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+
+        {/* Dynamic Header */}
+        <header className="h-20 border-b border-zinc-900 flex items-center justify-between px-8 sticky top-0 z-40 bg-black/80 backdrop-blur-md">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-2 text-black dark:text-white"
+              className="lg:hidden p-2 text-white"
             >
               <Menu className="w-6 h-6" />
             </button>
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-              <span>Enterprise</span>
-              <ChevronRight className="w-3 h-3" />
-              <span className="text-black dark:text-[#75E2FF]">
-                {activeModule === 'cms-editor' ? 'Editor' : activeModule}
+            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em]">
+              <span className="text-zinc-600">Root</span>
+              <ChevronRight className="w-3 h-3 text-zinc-800" />
+              <span className="text-[#75E2FF]">
+                {activeModule === 'cms-editor' ? 'Block Editor' : activeModule}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex flex-col items-end">
-              <span className="text-[10px] font-black text-black dark:text-white uppercase tracking-tight">
+              <span className="text-[10px] font-black text-white uppercase tracking-tight">
                 {session.user.email}
               </span>
-              <span className="text-[8px] font-bold text-[#75E2FF] uppercase tracking-widest">Admin Node #1</span>
+              <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Node: {session.user.id.slice(0, 8)}</span>
             </div>
-            <div className="w-10 h-10 bg-black dark:bg-zinc-800 border border-[#75E2FF] flex items-center justify-center">
-              <span className="text-xs font-black text-white">AD</span>
+            <div className="w-10 h-10 bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+              <span className="text-xs font-black text-[#75E2FF]">AD</span>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <div className="p-8 md:p-12 max-w-7xl mx-auto w-full">
+        <div className="p-8 md:p-12 max-w-7xl mx-auto w-full relative z-10">
           {activeModule === 'dashboard' && (
             <MainDashboard 
               userEmail={session.user.email} 
@@ -191,15 +210,18 @@ function NavItem({ icon: Icon, label, active, onClick }: {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-4 px-4 py-3.5 transition-all group ${
+      className={`w-full flex items-center gap-4 px-4 py-4 transition-all group relative overflow-hidden ${
         active 
-          ? 'bg-[#75E2FF] text-black shadow-[4px_4px_0px_0px_rgba(255,255,255,0.1)]' 
-          : 'text-zinc-500 hover:text-white hover:bg-zinc-900'
+          ? 'text-black' 
+          : 'text-zinc-500 hover:text-white hover:bg-zinc-950'
       }`}
     >
-      <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${active ? 'text-black' : ''}`} />
-      <span className="text-[11px] font-black uppercase tracking-widest">{label}</span>
-      {active && <div className="ml-auto w-1.5 h-1.5 bg-black rounded-full" />}
+      {active && (
+        <div className="absolute inset-0 bg-[#75E2FF] z-0" />
+      )}
+      <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 relative z-10 ${active ? 'text-black' : ''}`} />
+      <span className="text-[11px] font-black uppercase tracking-[0.2em] relative z-10">{label}</span>
+      {active && <div className="ml-auto w-1 h-1 bg-black rounded-full relative z-10" />}
     </button>
   );
 }

@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Disable static page generation optimization if it's timing out due to complex dynamic content
-  // Note: This is a workaround for specific build environments.
-  staticPageGenerationTimeout: 120,
+  staticPageGenerationTimeout: 300,
   typescript: {
     ignoreBuildErrors: true,
   },
