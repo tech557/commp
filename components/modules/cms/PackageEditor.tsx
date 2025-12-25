@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Package } from '../../../types/package';
 import { supabase } from '../../../lib/supabase/client';
-import { ChevronLeft, Save, Rocket, Settings, Loader2, Layout, BarChart3, FileEdit, Copy, ExternalLink } from 'lucide-react';
+import { ChevronLeft, Rocket, Settings, Loader2, Layout, BarChart3, FileEdit, Copy, ExternalLink } from 'lucide-react';
 import { Button } from '../../ui/FormElements';
 import { BlockEditor } from './BlockEditor';
 import { PackageAnalytics } from '../analytics/PackageAnalytics';
@@ -90,9 +90,9 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 text-slate-400">
-        <Loader2 className="w-10 h-10 animate-spin text-black mb-4" />
-        <p className="text-[10px] font-black tracking-widest text-black uppercase">Initializing OS/Editor...</p>
+      <div className="flex flex-col items-center justify-center py-32 text-zinc-400">
+        <Loader2 className="w-10 h-10 animate-spin text-[#75E2FF] mb-4" />
+        <p className="text-[10px] font-black tracking-widest text-zinc-600 uppercase">Initializing OS/Editor...</p>
       </div>
     );
   }
@@ -102,36 +102,36 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
       {/* Context Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b-2 border-black">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b-2 border-black dark:border-zinc-800">
         <div className="flex items-center gap-6">
           <button 
             onClick={onBack}
-            className="p-3 bg-white border-2 border-black hover:bg-slate-50 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+            className="p-3 bg-white dark:bg-zinc-900 border-2 border-black dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(117,226,255,0.1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
           >
-            <ChevronLeft className="w-5 h-5 text-black" />
+            <ChevronLeft className="w-5 h-5 text-black dark:text-white" />
           </button>
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest border border-black ${
+              <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest border border-black dark:border-zinc-800 ${
                 pkg.status === 'published' 
                   ? 'bg-[#75E2FF] text-black' 
-                  : 'bg-black text-white'
+                  : 'bg-black text-white dark:bg-zinc-800 dark:text-zinc-300'
               }`}>
                 {pkg.status}
               </span>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Package Engine / {view === 'content' ? 'Edit Mode' : 'Analytics Mode'}</span>
+              <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Package Engine / {view === 'content' ? 'Edit Mode' : 'Analytics Mode'}</span>
             </div>
-            <h1 className="text-4xl font-black tracking-tighter text-black uppercase">{pkg.title}</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-black dark:text-white uppercase">{pkg.title}</h1>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           {/* View Toggle */}
-          <div className="flex bg-black p-1 mr-4">
+          <div className="flex bg-black dark:bg-zinc-900 p-1 mr-4">
             <button 
               onClick={() => setView('content')}
               className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${
-                view === 'content' ? 'bg-[#75E2FF] text-black' : 'text-slate-500 hover:text-white'
+                view === 'content' ? 'bg-[#75E2FF] text-black' : 'text-zinc-500 hover:text-white'
               }`}
             >
               <FileEdit className="w-3.5 h-3.5" />
@@ -140,7 +140,7 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
             <button 
               onClick={() => setView('analytics')}
               className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all ${
-                view === 'analytics' ? 'bg-[#75E2FF] text-black' : 'text-slate-500 hover:text-white'
+                view === 'analytics' ? 'bg-[#75E2FF] text-black' : 'text-zinc-500 hover:text-white'
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
@@ -148,17 +148,17 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
             </button>
           </div>
 
-          <button className="p-3 text-black hover:bg-slate-50 border-2 border-black transition-all">
+          <button className="p-3 text-black dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800 border-2 border-black dark:border-zinc-800 transition-all">
             <Settings className="w-5 h-5" />
           </button>
-          <div className="w-[2px] h-10 bg-black mx-1" />
+          <div className="w-[2px] h-10 bg-black dark:bg-zinc-800 mx-1" />
           {pkg.status !== 'published' ? (
-            <Button onClick={handlePublish} variant="accent" className="px-10 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <Button onClick={handlePublish} variant="accent" className="px-10 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(117,226,255,0.2)]">
               <Rocket className="w-4 h-4 mr-2" />
               Go Live
             </Button>
           ) : (
-            <Button onClick={handleUnpublish} variant="secondary" className="px-10 py-4 border-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <Button onClick={handleUnpublish} variant="secondary" className="px-10 py-4 border-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.5)]">
               Unpublish
             </Button>
           )}
@@ -182,7 +182,7 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
                 </h3>
                 <p className="text-sm font-bold text-black mb-4">Your campaign is live. Test the employee experience below.</p>
                 <div className="space-y-4">
-                  <div className="p-3 bg-white border border-black font-mono text-[10px] break-all">
+                  <div className="p-3 bg-white border border-black font-mono text-[10px] break-all text-black">
                     {getPublicLink()}
                   </div>
                   <div className="flex gap-2">
@@ -207,32 +207,32 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
               </div>
             )}
 
-            <div className="bg-white border-2 border-black p-8 shadow-[12px_12px_0px_0px_rgba(227,228,229,1)]">
-              <h3 className="text-xs font-black text-black uppercase tracking-widest mb-6 flex items-center gap-2">
+            <div className="bg-white dark:bg-zinc-950 border-2 border-black dark:border-zinc-800 p-8 shadow-[12px_12px_0px_0px_rgba(227,228,229,1)] dark:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+              <h3 className="text-xs font-black text-black dark:text-white uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Layout className="w-4 h-4" />
                 Campaign Properties
               </h3>
               
               <div className="space-y-6">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Package Slug</p>
-                  <div className="p-3 bg-slate-50 border border-slate-200 font-mono text-xs text-slate-600">
+                  <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">Package Slug</p>
+                  <div className="p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 font-mono text-xs text-zinc-600 dark:text-zinc-400">
                     /p/{pkg.slug}
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Distribution</p>
+                  <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">Distribution</p>
                   <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-black text-white text-[9px] font-black uppercase tracking-widest">All Staff</span>
-                    <span className="px-2 py-1 border border-black text-[9px] font-black uppercase tracking-widest">+ Add Segment</span>
+                    <span className="px-2 py-1 bg-black dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-widest">All Staff</span>
+                    <span className="px-2 py-1 border border-black dark:border-zinc-800 text-black dark:text-white text-[9px] font-black uppercase tracking-widest hover:bg-[#75E2FF] hover:text-black cursor-pointer transition-colors">+ Add Segment</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-black border-2 border-black p-8 shadow-[12px_12px_0px_0px_rgba(117,226,255,0.4)]">
-              <h3 className="text-xs font-black text-[#75E2FF] uppercase tracking-widest mb-4">Pro Tip</h3>
+            <div className="bg-black dark:bg-[#75E2FF]/10 border-2 border-black dark:border-[#75E2FF] p-8 shadow-[12px_12px_0px_0px_rgba(117,226,255,0.4)]">
+              <h3 className="text-xs font-black text-[#75E2FF] dark:text-white uppercase tracking-widest mb-4">Pro Tip</h3>
               <p className="text-sm font-bold text-white leading-tight">
                 Keep your messages short. High-intensity visuals perform 40% better on mobile distribution.
               </p>

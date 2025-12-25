@@ -32,8 +32,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, onEdit,
 
   if (employees.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-20 border-2 border-dashed border-zinc-200 dark:border-zinc-800 text-muted-foreground bg-white dark:bg-black animate-in fade-in duration-300">
-        <p className="text-[10px] font-black text-foreground uppercase tracking-widest">No matching identities found</p>
+      <div className="flex flex-col items-center justify-center p-20 border-2 border-dashed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black animate-in fade-in duration-300">
+        <p className="text-[10px] font-black text-black dark:text-white uppercase tracking-widest">No matching identities found</p>
       </div>
     );
   }
@@ -51,7 +51,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, onEdit,
               <th className="px-6 py-5 text-[10px] font-black text-black dark:text-white uppercase tracking-widest text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y-2 divide-black dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
             {employees.map((emp) => (
               <tr key={emp.id} className="group hover:bg-[#75E2FF]/5 transition-all duration-200">
                 <td className="px-6 py-5">
@@ -60,10 +60,10 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, onEdit,
                       {getInitials(emp.full_name, emp.email)}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-black text-foreground tracking-normal text-base truncate group-hover:text-[#75E2FF] transition-colors">
+                      <span className="font-black text-black dark:text-white tracking-normal text-base truncate group-hover:text-[#75E2FF] transition-colors">
                         {emp.full_name || 'Anonymous'}
                       </span>
-                      <div className="flex items-center text-muted-foreground text-[10px] font-bold lowercase tracking-normal mt-0.5 truncate">
+                      <div className="flex items-center text-zinc-500 dark:text-zinc-400 text-[10px] font-bold lowercase tracking-normal mt-0.5 truncate">
                         <Mail className="w-3 h-3 mr-1.5 text-[#75E2FF]" />
                         {emp.email?.toLowerCase()}
                       </div>
@@ -72,15 +72,15 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, onEdit,
                 </td>
                 <td className="px-6 py-5">
                   {emp.department ? (
-                    <span className="inline-flex items-center px-3 py-1 text-[9px] font-black uppercase tracking-widest bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white border border-black dark:border-zinc-700">
+                    <span className="inline-flex items-center px-3 py-1 text-[9px] font-black uppercase tracking-widest bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white border border-zinc-200 dark:border-zinc-700">
                       {emp.department}
                     </span>
                   ) : (
-                    <span className="text-zinc-300 dark:text-zinc-800 text-[9px] font-black uppercase tracking-widest italic">Unassigned</span>
+                    <span className="text-zinc-300 dark:text-zinc-600 text-[9px] font-black uppercase tracking-widest italic">Unassigned</span>
                   )}
                 </td>
                 <td className="px-6 py-5">
-                  <div className="flex items-center text-foreground font-bold uppercase text-[10px] tracking-widest">
+                  <div className="flex items-center text-black dark:text-white font-bold uppercase text-[10px] tracking-widest">
                     <MapPin className="w-3.5 h-3.5 mr-2 text-zinc-400" />
                     <span className="truncate">{emp.location || 'Global/Remote'}</span>
                   </div>
@@ -89,12 +89,12 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, onEdit,
                   <div className="flex flex-wrap gap-1.5">
                     {emp.tags && emp.tags.length > 0 ? (
                       emp.tags.slice(0, 2).map((tag, i) => (
-                        <span key={i} className="inline-flex items-center px-2 py-0.5 bg-black dark:bg-zinc-900 text-white dark:text-[#75E2FF] text-[8px] font-black uppercase tracking-widest">
+                        <span key={i} className="inline-flex items-center px-2 py-0.5 bg-black dark:bg-zinc-800 text-white dark:text-[#75E2FF] text-[8px] font-black uppercase tracking-widest">
                           {tag}
                         </span>
                       ))
                     ) : (
-                      <span className="text-zinc-200 dark:text-zinc-900 text-[9px] font-black">---</span>
+                      <span className="text-zinc-200 dark:text-zinc-800 text-[9px] font-black">---</span>
                     )}
                   </div>
                 </td>
@@ -112,7 +112,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ employees, onEdit,
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-muted-foreground hover:text-foreground transition-all">
+                    <button className="p-2 text-zinc-400 hover:text-black dark:hover:text-white transition-all">
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>
