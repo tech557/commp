@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Package } from '../../../types/package';
 import { supabase } from '../../../lib/supabase/client';
-import { ChevronLeft, Save, Rocket, Settings, Loader2, Layout, BarChart3, FileEdit } from 'lucide-react';
+import { ChevronLeft, Save, Rocket, Settings, Loader2, Layout, BarChart3, FileEdit, Copy, ExternalLink } from 'lucide-react';
 import { Button } from '../../ui/FormElements';
 import { BlockEditor } from './BlockEditor';
 import { PackageAnalytics } from '../analytics/PackageAnalytics';
@@ -16,6 +16,7 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
   const [pkg, setPkg] = useState<Package | null>(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'content' | 'analytics'>('content');
+  const [testEmployeeId, setTestEmployeeId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPackage = async () => {
@@ -29,6 +30,12 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
 
         if (error) throw error;
         setPkg(data);
+
+        // Fetch a random employee ID for testing the link
+        const { data: employees } = await supabase.from('employees').select('id').limit(1);
+        if (employees && employees.length > 0) {
+          setTestEmployeeId(employees[0].id);
+        }
       } catch (err: any) {
         toast.error('Failed to load package details');
         onBack();
@@ -68,6 +75,17 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
     } catch (err: any) {
       toast.error('Failed to retract');
     }
+  };
+
+  const getPublicLink = () => {
+    if (!pkg) return '';
+    const baseUrl = window.location.origin + window.location.pathname;
+    return `${baseUrl}?p=${pkg.slug}&t=${testEmployeeId || 'REPLACE_WITH_EMPLOYEE_ID'}`;
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(getPublicLink());
+    toast.success('Public link copied to clipboard');
   };
 
   if (loading) {
@@ -156,6 +174,39 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
 
           {/* Sidebar / Configuration */}
           <div className="lg:col-span-4 space-y-8">
+            {pkg.status === 'published' && (
+              <div className="bg-[#75E2FF] border-2 border-black p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+                <h3 className="text-xs font-black text-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  Live Deployment
+                </h3>
+                <p className="text-sm font-bold text-black mb-4">Your campaign is live. Test the employee experience below.</p>
+                <div className="space-y-4">
+                  <div className="p-3 bg-white border border-black font-mono text-[10px] break-all">
+                    {getPublicLink()}
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={copyLink}
+                      className="flex-1 py-3 bg-black text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      Copy Link
+                    </button>
+                    <a 
+                      href={getPublicLink()} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex-1 py-3 bg-white border border-black text-black text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      Preview
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white border-2 border-black p-8 shadow-[12px_12px_0px_0px_rgba(227,228,229,1)]">
               <h3 className="text-xs font-black text-black uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Layout className="w-4 h-4" />
@@ -180,9 +231,9 @@ export const PackageEditor: React.FC<PackageEditorProps> = ({ packageId, onBack 
               </div>
             </div>
 
-            <div className="bg-[#75E2FF] border-2 border-black p-8 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
-              <h3 className="text-xs font-black text-black uppercase tracking-widest mb-4">Pro Tip</h3>
-              <p className="text-sm font-bold text-black leading-tight">
+            <div className="bg-black border-2 border-black p-8 shadow-[12px_12px_0px_0px_rgba(117,226,255,0.4)]">
+              <h3 className="text-xs font-black text-[#75E2FF] uppercase tracking-widest mb-4">Pro Tip</h3>
+              <p className="text-sm font-bold text-white leading-tight">
                 Keep your messages short. High-intensity visuals perform 40% better on mobile distribution.
               </p>
             </div>

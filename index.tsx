@@ -21,6 +21,7 @@ import { EmployeeList } from './components/modules/crm/EmployeeList';
 import { PackageList } from './components/modules/cms/PackageList';
 import { PackageEditor } from './components/modules/cms/PackageEditor';
 import { SettingsPage } from './components/modules/settings/SettingsPage';
+import { PublicView } from './components/modules/cms/PublicView';
 
 type Module = 'dashboard' | 'crm' | 'cms' | 'settings' | 'cms-editor';
 
@@ -30,6 +31,11 @@ const App = () => {
   const [activeModule, setActiveModule] = useState<Module>('dashboard');
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Simple Router Logic
+  const queryParams = new URLSearchParams(window.location.search);
+  const publicSlug = queryParams.get('p');
+  const publicToken = queryParams.get('t');
 
   useEffect(() => {
     const init = async () => {
@@ -65,6 +71,16 @@ const App = () => {
     setActiveModule(module);
     if (window.innerWidth < 1024) setIsSidebarOpen(false);
   };
+
+  // 1. Render Public View if URL parameters are present
+  if (publicSlug && publicToken) {
+    return (
+      <>
+        <PublicView slug={publicSlug} token={publicToken} />
+        <Toaster position="bottom-center" richColors theme="light" />
+      </>
+    );
+  }
 
   if (loading) {
     return (
@@ -108,10 +124,10 @@ const App = () => {
         <div className="h-full flex flex-col p-8 bg-grid">
           <div className="mb-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#75E2FF] flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-black" />
+              <div className="w-8 h-8 bg-[#75E2FF] flex items-center justify-center" onClick={() => window.location.href = '/'}>
+                <ShieldCheck className="w-5 h-5 text-black cursor-pointer" />
               </div>
-              <div>
+              <div onClick={() => navigate('dashboard')} className="cursor-pointer">
                 <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-none">DOTMENT</h2>
                 <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Enterprise Portal</span>
               </div>
