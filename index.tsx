@@ -1,326 +1,260 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Toaster } from 'sonner';
+import { 
+  LayoutDashboard, 
+  Users, 
+  Layers, 
+  Settings as SettingsIcon, 
+  LogOut,
+  ChevronRight,
+  ShieldCheck,
+  Menu,
+  X,
+  Activity
+} from 'lucide-react';
+
+import { supabase, isSupabaseConfigured } from './lib/supabase/client';
+import { LoginPage } from './components/modules/auth/LoginPage';
+import { MainDashboard } from './components/modules/dashboard/MainDashboard';
 import { EmployeeList } from './components/modules/crm/EmployeeList';
 import { PackageList } from './components/modules/cms/PackageList';
 import { PackageEditor } from './components/modules/cms/PackageEditor';
-import { LoginPage } from './components/modules/auth/LoginPage';
-import { PublicView } from './components/modules/cms/PublicView';
-import { MainDashboard } from './components/modules/dashboard/MainDashboard';
 import { SettingsPage } from './components/modules/settings/SettingsPage';
-import { supabase, isSupabaseConfigured } from './lib/supabase/client';
-import { LogOut, LayoutDashboard, Users, FileText, BarChart3, Settings, Menu, X, Sun, Moon } from 'lucide-react';
-import { Toaster } from 'sonner';
-import './index.css';
 
-type Module = 'dashboard' | 'crm' | 'cms' | 'analytics' | 'settings' | 'editor' | 'public_view';
-
-const AdminLayout: React.FC<{ 
-  children: React.ReactNode; 
-  userEmail?: string; 
-  activeModule: Module;
-  onNavigate: (module: Module) => void;
-}> = ({ children, userEmail, activeModule, onNavigate }) => {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return document.documentElement.classList.contains('dark') || 
-             localStorage.getItem('theme') === 'dark';
-    }
-    return false;
-  });
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [adminProfile, setAdminProfile] = useState<{ full_name: string } | null>(null);
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!userEmail) return;
-      const { data } = await supabase
-        .from('admins')
-        .select('full_name')
-        .eq('email', userEmail)
-        .single();
-      if (data) setAdminProfile(data);
-    };
-    fetchProfile();
-  }, [userEmail]);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
-
-  const navItems = [
-    { name: 'Dashboard', id: 'dashboard' as Module, icon: LayoutDashboard },
-    { name: 'Directory', id: 'crm' as Module, icon: Users },
-    { name: 'Content', id: 'cms' as Module, icon: FileText },
-    { name: 'Analytics', id: 'analytics' as Module, icon: BarChart3 },
-    { name: 'Settings', id: 'settings' as Module, icon: Settings },
-  ];
-
-  const handleNav = (id: Module) => {
-    onNavigate(id);
-    setIsMobileMenuOpen(false);
-  };
-
-  const SidebarContent = () => (
-    <>
-      <div className="mb-12 cursor-pointer" onClick={() => handleNav('dashboard')}>
-        <h2 className="text-2xl font-black text-white tracking-normal">
-          DOTMENT
-        </h2>
-        <div className="h-1 w-8 bg-[#75E2FF] mt-1" />
-      </div>
-      
-      <nav className="space-y-4 flex-1">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => handleNav(item.id)}
-            className={`w-full flex items-center justify-between group transition-all duration-200 ${
-              activeModule === item.id || (activeModule === 'editor' && item.id === 'cms')
-                ? 'text-[#75E2FF]' 
-                : 'text-zinc-500 hover:text-white'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <item.icon className="w-4 h-4" />
-              <span className="text-xs font-black uppercase tracking-widest">{item.name}</span>
-            </div>
-            {(activeModule === item.id || (activeModule === 'editor' && item.id === 'cms')) && (
-              <div className="w-1.5 h-1.5 rounded-full bg-[#75E2FF]" />
-            )}
-          </button>
-        ))}
-      </nav>
-
-      <div className="mt-auto pt-8 border-t border-zinc-900">
-        <div className="flex items-center justify-between mb-6 px-1">
-          <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Appearance</span>
-          <button 
-            onClick={() => setIsDark(!isDark)}
-            className="w-10 h-5 bg-zinc-800 rounded-full relative transition-colors border border-zinc-700"
-          >
-            <div className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white flex items-center justify-center transition-all ${isDark ? 'left-[22px]' : 'left-1'}`}>
-              {isDark ? <Moon className="w-2 h-2 text-black" /> : <Sun className="w-2 h-2 text-black" />}
-            </div>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 bg-[#75E2FF] flex items-center justify-center text-xs font-black text-black">
-            {(adminProfile?.full_name || userEmail || 'A')[0].toUpperCase()}
-          </div>
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-[10px] font-black tracking-normal truncate text-white">
-              {adminProfile?.full_name || 'Administrator'}
-            </span>
-            <span className="text-[9px] text-[#75E2FF] lowercase font-bold">
-              {userEmail?.toLowerCase()}
-            </span>
-          </div>
-        </div>
-        <button 
-          onClick={handleSignOut}
-          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          Terminate Session
-        </button>
-      </div>
-    </>
-  );
-
-  return (
-    <div className="min-h-screen bg-background flex text-foreground transition-colors duration-300">
-      {/* Sidebar Desktop */}
-      <aside className="w-64 bg-black text-white p-8 hidden lg:flex flex-col border-r border-black dark:border-zinc-800 shrink-0 h-screen sticky top-0">
-        <SidebarContent />
-      </aside>
-
-      {/* Mobile Nav Trigger */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-black text-white px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl font-black tracking-normal">DOTMENT</h2>
-          <div className="h-4 w-px bg-zinc-800" />
-          <span className="text-[10px] font-black uppercase text-[#75E2FF] tracking-widest">
-            {navItems.find(i => i.id === activeModule)?.name || 'Editor'}
-          </span>
-        </div>
-        <button 
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2 text-white hover:text-[#75E2FF]"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Mobile Drawer Overlay */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-          <aside className="absolute top-0 right-0 w-[280px] h-full bg-black text-white p-8 flex flex-col animate-in slide-in-from-right duration-300">
-            <div className="flex justify-end mb-8">
-              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:text-[#75E2FF]">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <SidebarContent />
-          </aside>
-        </div>
-      )}
-
-      <main className="flex-1 overflow-y-auto w-full pt-20 lg:pt-0">
-        <div className="max-w-7xl mx-auto p-6 md:p-12">
-          {children}
-        </div>
-      </main>
-    </div>
-  );
-};
-
-const SetupNeeded = () => (
-  <div className="min-h-screen flex items-center justify-center bg-white p-6">
-    <div className="max-w-lg w-full bg-white rounded-none border-2 border-black p-12 text-left shadow-[20px_20px_0px_0px_rgba(0,0,0,1)]">
-      <h1 className="text-4xl font-black text-black tracking-normal mb-4">Infrastructure Error</h1>
-      <p className="text-muted-foreground mb-8 font-medium">
-        Database connection keys are missing. DOTMENT core services cannot initialize without a valid Supabase configuration.
-      </p>
-      
-      <div className="bg-zinc-100 p-6 mb-8 border border-black">
-        <p className="text-[10px] font-black text-black uppercase tracking-widest mb-4">Requirement:</p>
-        <code className="text-xs block bg-black text-[#75E2FF] p-4 font-mono">
-          const SUPABASE_ANON_KEY = 'your_key_here';
-        </code>
-      </div>
-
-      <button 
-        onClick={() => window.location.reload()}
-        className="w-full py-4 bg-[#75E2FF] text-black font-black uppercase tracking-widest border border-black hover:bg-black hover:text-white transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
-      >
-        Retry Initialization
-      </button>
-    </div>
-  </div>
-);
+type Module = 'dashboard' | 'crm' | 'cms' | 'settings' | 'cms-editor';
 
 const App = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeModule, setActiveModule] = useState<Module>('dashboard');
-  const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
-  const [publicRoute, setPublicRoute] = useState<{ slug: string; token: string } | null>(null);
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
-    const path = window.location.pathname;
-    const searchParams = new URLSearchParams(window.location.search);
-    const token = searchParams.get('token');
-    
-    if (path.startsWith('/view/') && token) {
-      const slug = path.split('/view/')[1];
-      setPublicRoute({ slug, token });
-      setActiveModule('public_view');
-      setLoading(false);
-      return;
-    }
+    const init = async () => {
+      try {
+        if (!isSupabaseConfigured) {
+          setLoading(false);
+          return;
+        }
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+      } catch (e) {
+        console.error("Authentication check failed", e);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (!isSupabaseConfigured) {
-      setLoading(false);
-      return;
-    }
+    init();
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const handleEditPackage = (id: string) => {
-    setEditingPackageId(id);
-    setActiveModule('editor');
+    setSelectedPackageId(id);
+    setActiveModule('cms-editor');
   };
 
-  const handleCloseEditor = () => {
-    setEditingPackageId(null);
-    setActiveModule('cms');
+  const navigate = (module: Module) => {
+    setActiveModule(module);
+    if (window.innerWidth < 1024) setIsSidebarOpen(false);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-black border-t-[#75E2FF] animate-spin" />
-          <p className="text-xs font-black uppercase tracking-widest text-foreground">System Loading</p>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+        <div className="w-12 h-12 border-2 border-zinc-900 border-t-[#75E2FF] rounded-full animate-spin mb-6" />
+        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#75E2FF] animate-pulse">Initializing Security Protocols</p>
+      </div>
+    );
+  }
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-8">
+        <div className="max-w-md w-full border border-red-900 bg-red-950/10 p-10 text-center">
+          <ShieldCheck className="w-12 h-12 text-red-500 mx-auto mb-6" />
+          <h1 className="text-xl font-black uppercase tracking-tight text-white mb-4">Core Infrastructure Error</h1>
+          <p className="text-sm text-red-400 font-medium mb-8">Environment keys for Supabase are missing or invalid.</p>
+          <button onClick={() => window.location.reload()} className="w-full py-3 bg-red-600 text-white font-black uppercase tracking-widest text-xs">Retry Connection</button>
         </div>
       </div>
     );
   }
 
-  if (activeModule === 'public_view' && publicRoute) {
-    return <PublicView slug={publicRoute.slug} token={publicRoute.token} />;
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-white">
+        <LoginPage onLoginSuccess={() => window.location.reload()} />
+        <Toaster position="bottom-right" richColors theme="dark" />
+      </div>
+    );
   }
 
-  if (!isSupabaseConfigured) return <SetupNeeded />;
-  if (!session) return <LoginPage onLoginSuccess={() => setLoading(false)} />;
-
   return (
-    <AdminLayout 
-      userEmail={session.user.email} 
-      activeModule={activeModule}
-      onNavigate={setActiveModule}
-    >
-      <Toaster position="bottom-right" richColors />
-      
-      {activeModule === 'dashboard' && (
-        <MainDashboard 
-          userEmail={session.user.email} 
-          onNavigate={(mod) => setActiveModule(mod)}
-          onEditPackage={handleEditPackage}
-        />
-      )}
-      
-      {activeModule === 'crm' && <EmployeeList />}
-      
-      {activeModule === 'cms' && <PackageList onSelect={handleEditPackage} />}
-      
-      {activeModule === 'analytics' && (
-        <div className="space-y-8 animate-in fade-in duration-500">
-          <div>
-            <h1 className="text-4xl font-black text-foreground tracking-normal">Analytics Overview</h1>
-            <p className="text-muted-foreground mt-1 font-medium">Select a campaign below to view detailed performance reports.</p>
+    <div className="min-h-screen bg-black flex font-sans selection:bg-[#75E2FF] selection:text-black">
+      {/* Sidebar Navigation */}
+      <aside 
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-black border-r border-zinc-900 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="h-full flex flex-col p-8 bg-grid">
+          <div className="mb-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-[#75E2FF] flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-black" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-white tracking-tighter uppercase leading-none">DOTMENT</h2>
+                <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Enterprise Portal</span>
+              </div>
+            </div>
+            <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-zinc-500 p-2">
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <PackageList onSelect={(id) => {
-            setEditingPackageId(id);
-            setActiveModule('editor');
-          }} />
+
+          <nav className="flex-1 space-y-1">
+            <NavItem 
+              icon={LayoutDashboard} 
+              label="Overview" 
+              active={activeModule === 'dashboard'} 
+              onClick={() => navigate('dashboard')} 
+            />
+            <NavItem 
+              icon={Users} 
+              label="Personnel" 
+              active={activeModule === 'crm'} 
+              onClick={() => navigate('crm')} 
+            />
+            <NavItem 
+              icon={Layers} 
+              label="Campaigns" 
+              active={activeModule === 'cms' || activeModule === 'cms-editor'} 
+              onClick={() => navigate('cms')} 
+            />
+            <div className="pt-10 pb-4">
+              <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest px-4 block">System Control</span>
+            </div>
+            <NavItem 
+              icon={SettingsIcon} 
+              label="Config" 
+              active={activeModule === 'settings'} 
+              onClick={() => navigate('settings')} 
+            />
+          </nav>
+
+          <div className="mt-auto pt-8 border-t border-zinc-900">
+            <div className="px-4 mb-6">
+              <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Authenticated</p>
+              <p className="text-[10px] font-black text-zinc-400 truncate uppercase tracking-tight">{session.user.email}</p>
+            </div>
+            <button 
+              onClick={() => supabase.auth.signOut()}
+              className="w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:text-red-500 transition-all group"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Terminate Session</span>
+            </button>
+          </div>
         </div>
-      )}
+      </aside>
 
-      {activeModule === 'settings' && <SettingsPage userEmail={session.user.email} />}
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-black relative">
+        <header className="h-20 border-b border-zinc-900 flex items-center justify-between px-8 bg-black/50 backdrop-blur-md z-40 shrink-0">
+          <div className="flex items-center gap-4">
+            {!isSidebarOpen && (
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="lg:hidden p-2 text-zinc-500 hover:text-white"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            )}
+            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em]">
+              <span className="text-zinc-600 hidden sm:inline">Root</span>
+              <ChevronRight className="w-3 h-3 text-zinc-800 hidden sm:inline" />
+              <span className="text-[#75E2FF]">
+                {activeModule === 'cms-editor' ? 'Editor v2.5' : activeModule.replace('-', ' ')}
+              </span>
+            </div>
+          </div>
 
-      {activeModule === 'editor' && editingPackageId && (
-        <PackageEditor packageId={editingPackageId} onBack={handleCloseEditor} />
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex flex-col items-end">
+              <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest leading-none mb-1 text-right">Status</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black text-white uppercase">Operational</span>
+              </div>
+            </div>
+            <div className="w-10 h-10 bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+              <Activity className="w-4 h-4 text-[#75E2FF]" />
+            </div>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto bg-grid relative custom-scrollbar">
+          <div className="p-8 md:p-12 max-w-7xl mx-auto w-full relative z-10">
+            {activeModule === 'dashboard' && (
+              <MainDashboard 
+                userEmail={session.user.email} 
+                onNavigate={(mod) => navigate(mod as any)}
+                onEditPackage={handleEditPackage}
+              />
+            )}
+            {activeModule === 'crm' && <EmployeeList />}
+            {activeModule === 'cms' && <PackageList onSelect={handleEditPackage} />}
+            {activeModule === 'cms-editor' && selectedPackageId && (
+              <PackageEditor 
+                packageId={selectedPackageId} 
+                onBack={() => setActiveModule('cms')} 
+              />
+            )}
+            {activeModule === 'settings' && <SettingsPage userEmail={session.user.email} />}
+          </div>
+        </div>
+      </main>
+      <Toaster position="bottom-right" richColors theme="dark" />
+    </div>
+  );
+};
+
+const NavItem = ({ icon: Icon, label, active, onClick }: { 
+  icon: any, 
+  label: string, 
+  active?: boolean, 
+  onClick: () => void 
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-4 px-4 py-4 transition-all group relative overflow-hidden ${
+        active 
+          ? 'text-black' 
+          : 'text-zinc-500 hover:text-white hover:bg-zinc-900/50'
+      }`}
+    >
+      {active && (
+        <div className="absolute inset-0 bg-[#75E2FF] z-0" />
       )}
-    </AdminLayout>
+      <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 relative z-10 ${active ? 'text-black' : ''}`} />
+      <span className="text-[11px] font-black uppercase tracking-[0.2em] relative z-10">{label}</span>
+      {active && <div className="ml-auto w-1 h-1 bg-black rounded-full relative z-10" />}
+    </button>
   );
 };
 
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
-  root.render(<React.StrictMode><App /></React.StrictMode>);
+  root.render(<App />);
 }
