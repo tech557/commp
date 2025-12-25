@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+// Fix: Replaced Plus_Jakarta_Sans with Inter to resolve module export error
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+// Fix: Initializing Inter font as a robust alternative
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-plus-jakarta-sans",
+  variable: "--font-inter",
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -19,10 +22,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${plusJakartaSans.variable} font-sans antialiased bg-background text-foreground`}>
+    <html lang="en" className={`dark h-full ${inter.variable}`}>
+      <body className="h-full font-sans antialiased bg-black text-white selection:bg-[#75E2FF] selection:text-black">
         {children}
-        <Toaster position="bottom-right" richColors />
+        <Toaster position="bottom-right" richColors closeButton />
       </body>
     </html>
   );

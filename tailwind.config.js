@@ -2,8 +2,7 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './index.html',
-    './index.tsx',
+    './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './lib/**/*.{ts,tsx}',
   ],
@@ -16,6 +15,10 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        // Fix: Updated variable name to match the new Inter font configuration in layout.tsx
+        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
