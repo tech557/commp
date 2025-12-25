@@ -3,7 +3,8 @@ import { supabase, isSupabaseConfigured } from '../../../lib/supabase/client';
 import { Lock, Mail, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button, Input, Label } from '../../ui/FormElements';
 
-const Alert = ({ children }: { children: React.ReactNode }) => (
+// Fix: Making children optional to resolve 'children is missing' error in some compiler configurations
+const Alert = ({ children }: { children?: React.ReactNode }) => (
   <div className="flex items-start gap-3 p-4 bg-red-50 border border-black rounded-none text-red-800 animate-in fade-in slide-in-from-top-1 duration-200">
     <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
     <div className="text-xs font-bold uppercase tracking-tight leading-tight">{children}</div>

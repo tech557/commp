@@ -6,19 +6,19 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 0%;
-    --accent: 192 100% 73%;
-    --accent-foreground: 0 0% 0%;
   }
 
   .dark {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
-    --accent: 192 100% 73%;
-    --accent-foreground: 0 0% 0%;
   }
 
   body {
     @apply bg-black text-white;
     background-color: #000000;
   }
+}
+
+* {
+  border-color: rgba(255, 255, 255, 0.1);
 }
