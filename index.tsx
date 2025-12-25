@@ -60,27 +60,36 @@ const App = () => {
   }, [theme]);
 
   useEffect(() => {
+    // Failsafe: Don't stay on loading screen for more than 5 seconds
+    const fallbackTimer = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
     const init = async () => {
       try {
         if (!isSupabaseConfigured) {
           setLoading(false);
+          clearTimeout(fallbackTimer);
           return;
         }
+
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         
         if (currentSession) {
-          const { data: profile } = await supabase
+          const { data: profile, error } = await supabase
             .from('admins')
             .select('*')
             .eq('id', currentSession.user.id)
-            .single();
-          setUserProfile(profile);
+            .maybeSingle(); // Use maybeSingle to avoid errors if profile is missing
+          
+          if (profile) setUserProfile(profile);
         }
       } catch (e) {
-        console.error("Authentication check failed", e);
+        console.error("Initialization failed", e);
       } finally {
         setLoading(false);
+        clearTimeout(fallbackTimer);
       }
     };
 
@@ -93,14 +102,17 @@ const App = () => {
           .from('admins')
           .select('*')
           .eq('id', newSession.user.id)
-          .single();
+          .maybeSingle();
         setUserProfile(profile);
       } else {
         setUserProfile(null);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const handleEditPackage = (id: string) => {
@@ -254,9 +266,9 @@ const App = () => {
             {!isSidebarCollapsed && (
               <div className="px-4 mb-6">
                 <p className="text-[8px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-1">Authenticated</p>
-                <p className="text-[10px] font-black text-zinc-600 dark:text-zinc-400 truncate uppercase tracking-tight">{session.user.email}</p>
+                <p className="text-[10px] font-black text-zinc-600 dark:text-zinc-400 truncate uppercase tracking-tight leading-tight">{session.user.email}</p>
                 {userProfile && (
-                  <span className="mt-1 inline-block px-1.5 py-0.5 bg-black dark:bg-zinc-800 text-[#75E2FF] text-[7px] font-black uppercase tracking-widest">
+                  <span className="mt-1 inline-block px-1.5 py-0.5 bg-black dark:bg-zinc-800 text-[#75E2FF] text-[7px] font-black uppercase tracking-widest border border-black dark:border-zinc-700">
                     {userProfile.role.replace('_', ' ')}
                   </span>
                 )}
