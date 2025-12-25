@@ -1,13 +1,11 @@
-import React from "react";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const inter = Inter({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: 'swap',
+  variable: "--font-plus-jakarta-sans",
 });
 
 export const metadata: Metadata = {
@@ -21,10 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark h-full ${inter.variable}`}>
-      <body className="h-full font-sans antialiased bg-black text-white selection:bg-[#75E2FF] selection:text-black">
+    <html lang="en" className="dark">
+      <body className={`${plusJakartaSans.variable} font-sans antialiased bg-background text-foreground`}>
         {children}
-        <Toaster position="bottom-right" richColors closeButton />
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

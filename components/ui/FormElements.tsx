@@ -1,8 +1,7 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
 
-// Fix: Making children optional to resolve 'children is missing' errors across multiple modules
-export const Label = ({ children, htmlFor, className = "" }: { children?: React.ReactNode, htmlFor?: string, className?: string }) => (
+export const Label = ({ children, htmlFor, className = "" }: { children: React.ReactNode, htmlFor?: string, className?: string }) => (
   <label htmlFor={htmlFor} className={`text-[11px] font-black text-black uppercase tracking-widest block mb-2 ${className}`}>
     {children}
   </label>
@@ -36,8 +35,7 @@ export const Button = React.forwardRef<HTMLButtonElement, any>(({ children, load
   );
 });
 
-// Fix: Making children optional to resolve 'children is missing' errors in dialog usage
-export const Dialog = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children?: React.ReactNode }) => {
+export const Dialog = ({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) => {
   if (!isOpen) return null;
   
   return (
